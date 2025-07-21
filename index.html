@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student's Desk</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: rgb(233,233,233);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 0 20px 20px 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .sidebar:hover {
+            width: 200px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #2e7d32;
+            text-decoration: none;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(46, 125, 50, 0.1);
+            transform: translateX(10px);
+        }
+
+        .sidebar-item.active {
+            background: rgba(46, 125, 50, 0.2);
+            border-right: 4px solid #4CAF50;
+        }
+
+        .sidebar-icon {
+            font-size: 24px;
+            min-width: 40px;
+            text-align: center;
+            color: #2e7d32;
+        }
+
+        .sidebar-text {
+            margin-left: 15px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-weight: 600;
+            white-space: nowrap;
+            color: #2e7d32;
+            font-size: 16px;
+        }
+
+        .sidebar:hover .sidebar-text {
+            opacity: 1;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 80px;
+            flex: 1;
+            padding: 40px;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .sidebar:hover + .main-content {
+            margin-left: 200px;
+        }
+
+        .content-section {
+            display: none;
+            width: 100%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Home Section */
+        .home-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .home-title {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .home-subtitle {
+            font-size: 1.5rem;
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        .home-description {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .home-description p {
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Chatbot Section */
+        .chatbot-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .chat-header {
+            background: #2e7d32;
+            color: white;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .chat-messages {
+            height: 450px;
+            background: #f8f9fa;
+            padding: 20px;
+            overflow-y: auto;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 18px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+            animation: slideIn 0.3s ease;
+        }
+
+        .user-message {
+            background: #2196F3;
+            color: white;
+            margin-left: auto;
+        }
+
+        .bot-message {
+            background: white;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .chat-input-container {
+            display: flex;
+            background: white;
+            padding: 20px;
+            border-radius: 0 0 20px 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .send-btn {
+            margin-left: 10px;
+            padding: 12px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn:hover {
+            background: #45a049;
+            transform: scale(1.1);
+        }
+
+        .chat-help {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .chat-help h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .chat-help p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        /* Leave Request Form */
+        .leave-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #2e7d32;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px 18px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        /* Leave Status */
+        .status-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .status-search {
+            display: flex;
+            margin-bottom: 30px;
+            gap: 15px;
+        }
+
+        .status-input {
+            flex: 1;
+            padding: 15px 18px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .search-btn {
+            padding: 15px 30px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+        }
+
+        .status-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .status-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .status-card h4 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .status-card p {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approved {
+            background: #d1edff;
+            color: #0c5460;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Success Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 15% auto;
+            padding: 40px;
+            border-radius: 20px;
+            width: 450px;
+            text-align: center;
+            animation: modalSlideIn 0.3s ease;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-icon {
+            font-size: 4rem;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .modal-message {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+        }
+
+        .modal-btn {
+            padding: 12px 35px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar:hover {
+                transform: translateX(0);
+            }
+
+            .content-section {
+                padding: 20px;
+            }
+
+            .home-title {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-item active" onclick="showSection('home')">
+            <div class="sidebar-icon">🏠</div>
+            <div class="sidebar-text">Home</div>
+        </div>
+        <div class="sidebar-item" onclick="showSection('chatbot')">
+            <div class="sidebar-icon">💬</div>
+            <div class="sidebar-text">ChatBot</div>
+        </div>
+        <div class="sidebar-item" onclick="showSection('leave-request')">
+            <div class="sidebar-icon">📝</div>
+            <div class="sidebar-text">Request Leave</div>
+        </div>
+        <div class="sidebar-item" onclick="showSection('leave-status')">
+            <div class="sidebar-icon">📊</div>
+            <div class="sidebar-text">Check Status</div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Home Section -->
+        <div class="content-section active" id="home">
+            <div class="home-header">
+                <h1 class="home-title">STUDENT'S DESK</h1>
+                <p class="home-subtitle">is Online Now!</p>
+            </div>
+            <div class="home-description">
+                <p>
+                    Welcome to Student's Desk! Your one-stop solution for academic queries, leave applications, and administrative tasks. Navigate through the sidebar to access different features.
+                </p>
+            </div>
+        </div>
+
+        <!-- Chatbot Section -->
+        <div class="content-section" id="chatbot">
+            <div class="chatbot-container">
+                <div class="chat-header">
+                    STUDENT'S DESK - ChatBot
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot-message">
+                        <strong>DeskMate:</strong><br>
+                        Hello! I'm your virtual assistant. Ask me about timetables, exams, placements, library hours, and more!
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Type here your queries" onkeypress="handleKeyPress(event)">
+                    <button class="send-btn" onclick="sendMessage()">🚀</button>
+                </div>
+            </div>
+            <div class="chat-help">
+                <h3>Ask Your Queries here</h3>
+                <p>Try asking: "What's today's class", "Library hours", "Placement dates", etc.</p>
+            </div>
+        </div>
+
+        <!-- Leave Request Section -->
+        <div class="content-section" id="leave-request">
+            <h2 class="section-title">Request Leave</h2>
+            <div class="leave-form">
+                <div class="form-group">
+                    <label class="form-label">Registration Number</label>
+                    <input type="text" class="form-input" id="regno" placeholder="Enter your registration number">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" id="name" placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Leave Date</label>
+                    <input type="date" class="form-input" id="leaveDate">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reason</label>
+                    <textarea class="form-input" id="reason" rows="4" placeholder="Enter reason for leave"></textarea>
+                </div>
+                <button class="submit-btn" onclick="submitLeaveRequest()">Submit Request</button>
+            </div>
+        </div>
+
+        <!-- Leave Status Section -->
+        <div class="content-section" id="leave-status">
+            <h2 class="section-title">Check Status</h2>
+            <div class="status-container">
+                <div class="status-search">
+                    <input type="text" class="status-input" id="statusRegno" placeholder="Enter registration number">
+                    <button class="search-btn" onclick="checkLeaveStatus()">Search</button>
+                </div>
+                <div id="statusResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <div class="modal-icon">✅</div>
+            <div class="modal-title">Request Submitted!</div>
+            <div class="modal-message">Your leave request has been successfully submitted and is now pending approval.</div>
+            <button class="modal-btn" onclick="closeModal()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // Fallback function for offline mode
+        function getBotResponse(userInput) {
+            for (let rule of knowledgeBase) {
+                for (let keyword of rule.keywords) {
+                    if (userInput.includes(keyword)) {
+                        return rule.response;
+                    }
+                }
+            }
+            return "Sorry, I didn't understand that. Try asking about timetables, exams, placements, library hours, fees, or faculty!";
+        }
+
+        // Knowledge base for chatbot
+        const knowledgeBase = [
+            {
+                keywords: ["timetable", "class schedule", "what today", "today class"],
+                response: "Today classes are Programming in Java 8–10am, DBMS 10am–12pm"
+            },
+            {
+                keywords: ["exam", "result", "result date"],
+                response: "Exam result will be published on July 4th (Good Luck)"
+            },
+            {
+                keywords: ["placements", "company", "company visits", "tcs", "infosys", "zoho"],
+                response: "Upcoming placements: TCS on July 28, Infosys on Aug 2, Zoho on July 27"
+            },
+            {
+                keywords: ["credit courses", "additional courses", "courses"],
+                response: "Additional courses available: Linux, Sensors and Development"
+            },
+            {
+                keywords: ["library timing", "library hours", "library open"],
+                response: "Library is open from 8 AM to 6 PM on weekdays"
+            },
+            {
+                keywords: ["internal marks", "sessional", "test marks"],
+                response: "Internal marks will be released by your class advisor next week"
+            },
+            {
+                keywords: ["hostel timing", "hostel rules", "hostel in/out"],
+                response: "Hostel in-time is 8 PM. Late entry requires prior permission"
+            },
+            {
+                keywords: ["faculty", "staff", "hod", "professor", "teacher"],
+                response: "You can meet your faculty during 12–1 PM or after 4 PM"
+            },
+            {
+                keywords: ["fee", "tuition", "payment", "college fees"],
+                response: "College fee last date is August 5. Pay via student portal"
+            }
+        ];
+
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => section.classList.remove('active'));
+
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+
+            // Update sidebar active state
+            const sidebarItems = document.querySelectorAll('.sidebar-item');
+            sidebarItems.forEach(item => item.classList.remove('active'));
+            event.target.closest('.sidebar-item').classList.add('active');
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // Add user message
+            addMessage(message, 'user');
+
+            // Clear input
+            input.value = '';
+
+            // Show typing indicator
+            addTypingIndicator();
+
+            try {
+                // Send request to Flask API
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+
+                // Remove typing indicator
+                removeTypingIndicator();
+
+                // Add bot response
+                addMessage(data.response, 'bot');
+            } catch (error) {
+                console.error('Error:', error);
+                removeTypingIndicator();
+
+                // Fallback to local knowledge base if API fails
+                const fallbackResponse = getBotResponse(message.toLowerCase());
+                addMessage(fallbackResponse, 'bot');
+            }
+        }
+
+        function addMessage(message, sender) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+
+            if (sender === 'user') {
+                messageDiv.innerHTML = `<strong>You:</strong><br>${message}`;
+            } else {
+                messageDiv.innerHTML = `<strong>DeskMate:</strong><br>${message}`;
+            }
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function addTypingIndicator() {
+            const messagesContainer = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot-message typing-indicator';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <strong>DeskMate:</strong><br>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <span>Typing</span>
+                    <div style="display: flex; gap: 2px;">
+                        <div style="width: 4px; height: 4px; background: #666; border-radius: 50%; animation: typing 1.4s infinite;"></div>
+                        <div style="width: 4px; height: 4px; background: #666; border-radius: 50%; animation: typing 1.4s infinite 0.2s;"></div>
+                        <div style="width: 4px; height: 4px; background: #666; border-radius: 50%; animation: typing 1.4s infinite 0.4s;"></div>
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        async function submitLeaveRequest() {
+            const regno = document.getElementById('regno').value;
+            const name = document.getElementById('name').value;
+            const leaveDate = document.getElementById('leaveDate').value;
+            const reason = document.getElementById('reason').value;
+
+            if (!regno || !name || !leaveDate || !reason) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            try {
+                // Send request to Flask API
+                const response = await fetch('/apply-leave', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        regno: regno,
+                        name: name,
+                        leave_date: leaveDate,
+                        reason: reason
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Clear form
+                    document.getElementById('regno').value = '';
+                    document.getElementById('name').value = '';
+                    document.getElementById('leaveDate').value = '';
+                    document.getElementById('reason').value = '';
+
+                    // Show success modal
+                    document.getElementById('successModal').style.display = 'block';
+                } else {
+                    alert('Error submitting leave request: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to submit leave request. Please try again.');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('successModal').style.display = 'none';
+        }
+
+        async function checkLeaveStatus() {
+            const regno = document.getElementById('statusRegno').value.trim();
+
+            if (!regno) {
+                alert('Please enter registration number');
+                return;
+            }
+
+            try {
+                // Send request to Flask API
+                const response = await fetch(`/leave-status/${regno}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const results = await response.json();
+                const resultsContainer = document.getElementById('statusResults');
+
+                if (!response.ok || results.length === 0) {
+                    resultsContainer.innerHTML = '<p style="text-align: center; color: #666;">No leave requests found for this registration number.</p>';
+                    return;
+                }
+
+                resultsContainer.innerHTML = results.map(req => `
+                    <div class="status-card">
+                        <h4>Leave Request</h4>
+                        <p><strong>Reg_no:</strong> ${req.regno}</p>
+                        <p><strong>Name:</strong> ${req.name}</p>
+                        <p><strong>Leave Date:</strong> ${req.leave_date}</p>
+                        <p><strong>Reason:</strong> ${req.reason}</p>
+                        <p><strong>Status:</strong>
+                            <span class="status-badge status-${req.status.toLowerCase()}">${req.status}</span>
+                        </p>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('statusResults').innerHTML =
+                    '<p style="text-align: center; color: #f44336;">Error fetching leave status. Please try again.</p>';
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('successModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Initialize chatbot on load
+        window.onload = function() {
+            // Chatbot starts clean - no pre-loaded messages except welcome
+        }
+    </script>
+</body>
+</html>
